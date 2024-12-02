@@ -11,9 +11,11 @@ terraform {
 provider "aws" {
   region = "us-west-2"
 }
-resource "aws_s3_bucket" "s3_bucket" {
-  bucket = "my-terraform-state-bucket" 
+
+module "s3" {
+  source = "./modules/s3"
 }
+
 
 module "vpc" {
   source      = "./modules/vpc"
@@ -33,16 +35,7 @@ module "eks_cluster" {
   subnet_ids        = module.vpc.subnet_ids
   security_group_id = module.vpc.eks_sg.id
 }
-resource "aws_dynamodb_table" "terraform_lock" {
-  name           = "terraform-lock"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "LockID"
 
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
-}
 
 output "eks_cluster_name" {
   value = module.eks_cluster.cluster_name
